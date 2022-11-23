@@ -13,7 +13,15 @@ def _downloadAsset(githubPath, destination):
 		if not os.path.exists(destination):
 			with open(destination, "wb") as f:
 				f.write(requests.get("https://raw.githubusercontent.com/Wha-The/Assets/main/%s"%(githubPath)).content)
-
+def pip_install(package, alt_import_name=None):
+		try:
+			__import__(alt_import_name or package)
+		except ImportError:
+			subprocess.Popen([sys.executable, "-m", "pip", "install", package])
+pip_install("pyqrcode")
+pip_install("tornado")
+pip_install("pymsgbox")
+pip_install("pypng", "png")
 
 if os.path.split(os.path.dirname(os.path.abspath(__file__)))[1].lower() != "dropfile":
 	# create workspace folder
@@ -57,14 +65,7 @@ if os.path.split(os.path.dirname(os.path.abspath(__file__)))[1].lower() != "drop
 	if not os.path.exists(os.path.join(dropfile, "run.py")):
 		with open(os.path.join(dropfile, "run.py"), "wb") as fout, open(__file__, "rb") as fin:
 			fout.write(fin.read())
-	def pip_install(package):
-		try:
-			__import__(package)
-		except ImportError:
-			subprocess.Popen([sys.executable, "-m", "pip", "install", package])
-	pip_install("pyqrcode")
-	pip_install("tornado")
-	pip_install("pymsgbox")
+	
 	__import__("pymsgbox").alert("Setup complete.")
 	quit()
 
