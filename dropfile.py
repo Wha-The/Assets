@@ -14,7 +14,8 @@ def _downloadAsset(githubPath, destination):
 			with open(destination, "wb") as f:
 				f.write(requests.get("https://raw.githubusercontent.com/Wha-The/Assets/main/%s"%(githubPath)).content)
 
-if os.path.dirname(os.path.abspath(__file__)).lower() != "dropfile_":
+
+if os.path.split(os.path.dirname(os.path.abspath(__file__)))[1].lower() != "dropfile":
 	# create workspace folder
 	workspace = os.path.join(os.environ["localappdata"], "nwhut_workspace")
 	if not os.path.isdir(workspace): os.mkdir(workspace)
