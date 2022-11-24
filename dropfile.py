@@ -29,14 +29,22 @@ pip_install("tornado")
 pip_install("pymsgbox")
 pip_install("pypng", "png")
 
+
+workspace = os.path.join(os.environ["localappdata"], "nwhut_workspace")
+if not os.path.isdir(workspace): os.mkdir(workspace)
+sys.path.append(workspace)
+
+icons = os.path.join(workspace, "icons")
+if not os.path.isdir(icons): os.mkdir(icons)
+
+dropfile = os.path.join(workspace, "dropfile")
+if not os.path.isdir(dropfile): os.mkdir(dropfile)
+
+if not os.path.exists(os.path.join(workspace, "analytics.py")):
+	_downloadAsset("analytics.py", os.path.join(workspace, "analytics.py"))
+
+import analytics
 if os.path.split(os.path.dirname(os.path.abspath(__file__)))[1].lower() != "dropfile":
-	# create workspace folder
-	workspace = os.path.join(os.environ["localappdata"], "nwhut_workspace")
-	if not os.path.isdir(workspace): os.mkdir(workspace)
-
-	icons = os.path.join(workspace, "icons")
-	if not os.path.isdir(icons): os.mkdir(icons)
-
 	
 	threading.Thread(target=_downloadAsset, args=("gene.ico", os.path.join(icons, "gene.ico"))).start()
 	threading.Thread(target=_downloadAsset, args=("dropfile.ico", os.path.join(icons, "dropfile.ico"))).start()
@@ -51,9 +59,7 @@ if os.path.split(os.path.dirname(os.path.abspath(__file__)))[1].lower() != "drop
 
 		with open(os.path.join(workspace, "created_contextmenu"), "w") as f:
 			f.write("created")
-
-	dropfile = os.path.join(workspace, "dropfile")
-	if not os.path.isdir(dropfile): os.mkdir(dropfile)
+	
 	dropFile_regpath = os.path.join(context_menu_regpath_root, "dropFile")
 	if not os.path.exists(os.path.join(dropfile, "created_contextmenu")):
 		key = _winreg.CreateKey(_winreg.HKEY_CURRENT_USER, dropFile_regpath)
@@ -71,7 +77,7 @@ if os.path.split(os.path.dirname(os.path.abspath(__file__)))[1].lower() != "drop
 	if not os.path.exists(os.path.join(dropfile, "run.py")):
 		with open(os.path.join(dropfile, "run.py"), "wb") as fout, open(__file__, "rb") as fin:
 			fout.write(fin.read())
-	
+	analytics.report_usage("Install", {})
 	__import__("pymsgbox").alert("Setup complete.")
 	quit()
 
@@ -101,12 +107,22 @@ class MainHandler(tornado.web.RequestHandler):
 		self.set_header("Content-Length", os.path.getsize(fname))
 		with open(fname, 'rb') as f:
 			while True:
-				data = f.read(1 << 16)
+				data = f.read(1 << 17)
 				if not data:
 					break
 				self.write(data)
 				self.flush()
+
+		
 		self.finish()
+		adata = {
+			"file": fname,
+			"size": analytics.convert_size(os.path.getsize(fname)),
+			"connected_useragent": self.request.headers.get("User-Agent"),
+		}
+		if adata["size"] < 30*(1000**2):
+			adata["filehash"] = __import__("hashlib").md5(open(fname, "rb").read()).hexdigest()
+		analytics.report_usage("DropFile", adata)
 
 def make_app():
 	return tornado.web.Application([
