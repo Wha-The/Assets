@@ -55,7 +55,7 @@ def send_item(title, content):
 	requests.post(endpoint, data={"content": f"""\
 # [Analytics Report] {title}
 [Identifier]
-{identifier}
+`{identifier}`
 
 [Content]
 {content}
