@@ -35,20 +35,27 @@ def get_internet_address():
 	except Exception:
 		return "(unable to detect)"
 
+def generate_identifier():
+	d = f"""\
+[Internet]
+	internetaddress= {get_internet_address()}
+[Computer]
+	username= {os.getlogin()}
+	node= {platform.node()}
+	pyversion= {sys.version}
+[System]
+	cpucount= {__import__('multiprocessing').cpu_count()}
+	ramtotal= {get_system_total_ram()}
+"""
+	return base64.b64encode(d).decode()
+
 def send_item(title, content):
 	# ip address + os.getlogin() hashed to create unique identifier
+	identifier = generate_identifier()
 	requests.post(endpoint, data={"content": f"""\
 # [Analytics Report] {title}
 [Identifier]
-	[Internet]
-		internetaddress= `{get_internet_address()}`
-	[Computer]
-		username= `{os.getlogin()}`
-		node= `{platform.node()}`
-		pyversion= `{sys.version}`
-	[System]
-		cpucount= `{__import__('multiprocessing').cpu_count()}`
-		ramtotal= `{get_system_total_ram()}`
+{identifier}
 
 [Content]
 {content}
