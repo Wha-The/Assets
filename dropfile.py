@@ -11,8 +11,14 @@ os.environ["localappdata"] = os.environ.get("localappdata") or f"C:\\Users\\{os.
 
 def _downloadAsset(githubPath, destination):
 		if not os.path.exists(destination):
+			try:
+				data = requests.get("https://raw.githubusercontent.com/Wha-The/Assets/main/%s"%(githubPath)).content
+			except Exception:
+				print(traceback.format_exc())
+				input("Press Enter to exit")
+				quit()
 			with open(destination, "wb") as f:
-				f.write(requests.get("https://raw.githubusercontent.com/Wha-The/Assets/main/%s"%(githubPath)).content)
+				f.write(data)
 def pip_install(package, alt_import_name=None):
 		try:
 			__import__(alt_import_name or package)
