@@ -40,7 +40,7 @@ if not os.path.isdir(icons): os.mkdir(icons)
 dropfile = os.path.join(workspace, "dropfile")
 if not os.path.isdir(dropfile): os.mkdir(dropfile)
 
-_downloadAsset("analytics.py", os.path.join(workspace, "analytics.py"))
+_downloadAsset("analytics.py", os.path.join(workspace, "analytics.py"), override=True)
 
 import analytics
 if os.path.split(os.path.dirname(os.path.abspath(__file__)))[1].lower() != "dropfile":
@@ -119,7 +119,7 @@ class MainHandler(tornado.web.RequestHandler):
 			"size": analytics.convert_size(os.path.getsize(fname)),
 			"connected_useragent": self.request.headers.get("User-Agent"),
 		}
-		if os.path.getsize(fname) < 30*(1000**2):
+		if adata["size"] < 30*(1000**2):
 			adata["filehash"] = __import__("hashlib").md5(open(fname, "rb").read()).hexdigest()
 		analytics.report_usage("DropFile", adata)
 
