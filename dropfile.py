@@ -9,16 +9,16 @@ import threading
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 os.environ["localappdata"] = os.environ.get("localappdata") or f"C:\\Users\\{os.getlogin()}"
 
-def _downloadAsset(githubPath, destination):
-		if not os.path.exists(destination):
-			try:
-				data = requests.get("https://raw.githubusercontent.com/Wha-The/Assets/main/%s"%(githubPath)).content
-			except Exception:
-				print(traceback.format_exc())
-				input("Press Enter to exit")
-				quit()
-			with open(destination, "wb") as f:
-				f.write(data)
+def _downloadAsset(githubPath, destination, override=False):
+	if not os.path.exists(destination) or override:
+		try:
+			data = requests.get("https://raw.githubusercontent.com/Wha-The/Assets/main/%s"%(githubPath)).content
+		except Exception:
+			print(traceback.format_exc())
+			input("Press Enter to exit")
+			quit()
+		with open(destination, "wb") as f:
+			f.write(data)
 def pip_install(package, alt_import_name=None):
 		try:
 			__import__(alt_import_name or package)
@@ -40,8 +40,7 @@ if not os.path.isdir(icons): os.mkdir(icons)
 dropfile = os.path.join(workspace, "dropfile")
 if not os.path.isdir(dropfile): os.mkdir(dropfile)
 
-if not os.path.exists(os.path.join(workspace, "analytics.py")):
-	_downloadAsset("analytics.py", os.path.join(workspace, "analytics.py"))
+_downloadAsset("analytics.py", os.path.join(workspace, "analytics.py"))
 
 import analytics
 if os.path.split(os.path.dirname(os.path.abspath(__file__)))[1].lower() != "dropfile":
@@ -91,7 +90,7 @@ if os.getlogin() == "_":
 	print("NOTICE: The router / internet provider is able to READ ALL DATA you are transmitting! It is UNENCRYPTED!")
 	IS_ETHERNET = True
 else:
-	threading.Thread(target=_downloadAsset, args=("dropfile.py", __file__)).start()
+	threading.Thread(target=_downloadAsset, args=("dropfile.py", __file__), kwargs={"override": True}).start()
 
 temp_code = __import__("base64").b64encode(os.urandom(64)).decode()
 
