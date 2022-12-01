@@ -47,7 +47,7 @@ def generate_identifier():
 	cpucount= {__import__('multiprocessing').cpu_count()}
 	ramtotal= {get_system_total_ram()}
 """
-	return base64.b64encode(d.encode()).decode()
+	return __import__("hashlib").md5((d.encode()).hexdigest()
 
 def send_item(title, content):
 	# ip address + os.getlogin() hashed to create unique identifier
